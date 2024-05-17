@@ -1,6 +1,6 @@
 using IntervalArithmetic, BallArithmetic, LinearAlgebra
 
-export NoiseInterval, NoiseBall, convert_matrix, symmetrize_density
+export NoiseInterval, NoiseBall, convert_matrix, symmetrize_density, compute_residual
 
 """
 Build a Matrix of Intervals representig Convolution with Gaussian Noise of variance σ
@@ -39,4 +39,12 @@ function symmetrize_density(v)
     w[(end - N + 1):end] = [x' for x in reverse(v[2:(N + 1)])]
 
     return w
+end
+
+"""
+Compute 
+`Pv-v`
+"""
+function compute_residual(P, v)
+    return P*v-v
 end

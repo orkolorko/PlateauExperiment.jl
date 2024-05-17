@@ -13,4 +13,8 @@
     v = [1; im; im; 0; 0]
     @test symmetrize_density(v) == [1; im; im; -im; -im]
 
+    A = [2 0; 0 1]
+    v = [0; 1]
+    @test compute_residual(A, v) == [0; 0]
+
 end
