@@ -1,0 +1,3 @@
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+PlateauExperiment = "58a311ec-e281-471f-8342-309ad3fcfc23"
