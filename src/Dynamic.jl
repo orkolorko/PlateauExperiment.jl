@@ -1,5 +1,5 @@
 
-export T_minus_one_one, τ_1, τ_2, T
+export T_minus_one_one, τ_1, τ_2, T, Υ
 
 """
 Plateau map on [-1, 1]
@@ -34,4 +34,4 @@ This can be computed explictly as
 
 ``\Upsilon(\alpha, \beta) = \sqrt{2}((\ln((1+\beta)\alpha)-(\alpha-1))^2+(\alpha-1)^2)^{\frac{1}{2}}``
 """
-Γ(α, β) = sqrt(2) * ((ln((β + 1) * α) - (α - 1))^2 + (α - 1)^2)^(1 / 2)
+Υ(α, β) = sqrt(2) * ((log((β + 1) * α) - (α - 1))^2 + (α - 1)^2)^(1 / 2)

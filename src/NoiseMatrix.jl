@@ -18,4 +18,5 @@ function NoiseBall(σ, K)
     D = NoiseInterval(σ, K)
     Dc, Dr = IntervalArithmetic.mid.(D), IntervalArithmetic.radius.(D)
     bD = BallMatrix(Dc, Dr)
+    return bD
 end
