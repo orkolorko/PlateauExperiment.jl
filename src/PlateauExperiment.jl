@@ -1,5 +1,4 @@
 module PlateauExperiment
-
-# Write your package code here.
+    include("Dynamic.jl")
 
 end
