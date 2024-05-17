@@ -1,4 +1,4 @@
 module PlateauExperiment
     include("Dynamic.jl")
-    include("NoiseMatrix.jl")
+    include("Operators.jl")
 end

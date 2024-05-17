@@ -1,5 +1,7 @@
 using IntervalArithmetic, BallArithmetic
 
+export NoiseInterval, NoiseBall, convert_matrix
+
 """
 Build a Matrix of Intervals representig Convolution with Gaussian Noise of variance σ
 Galerkin truncated at frequence K
@@ -9,14 +11,18 @@ function NoiseInterval(σ, K)
                      [exp((-σ^2 * π^2 * interval(k)^2) / 2) for k in (-K):-1]])
 end
 
+"""
+Convert a matrix of Complex{Interval} to a BallMatrix with a center matrix of complex numbers
+"""
+function convert_matrix(M)
+    center = IntervalArithmetic.mid.(real.(M)) + im * IntervalArithmetic.mid.(imag.(M))
+    radius = sqrt.(IntervalArithmetic.radius.(real.(M)) .^ 2 + IntervalArithmetic.radius.(imag.(M)) .^ 2)
+    bM = BallMatrix(center, radius)
+    return bM
+end
 
 """
 Build a Matrix of Balls representig Convolution with Gaussian Noise of variance σ
 Galerkin truncated at frequence K
 """
-function NoiseBall(σ, K)
-    D = NoiseInterval(σ, K)
-    Dc, Dr = IntervalArithmetic.mid.(D), IntervalArithmetic.radius.(D)
-    bD = BallMatrix(Dc, Dr)
-    return bD
-end
+NoiseBall(σ, K) = convert_matrix(NoiseInterval(σ, K))
