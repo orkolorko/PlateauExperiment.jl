@@ -1,6 +1,6 @@
 name = "PlateauExperiment"
 uuid = "58a311ec-e281-471f-8342-309ad3fcfc23"
-authors = ["Isaia Nisoli"]
+authors = ["Isaia Nisoli, Charles Lopes Vereau"]
 version = "0.0.1-DEV"
 
 [deps]
