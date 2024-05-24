@@ -28,7 +28,7 @@ function Experiment(α, β, σ, K; max_iter = 10)
 
     PσK = bD * bPK
     F = eigen(PσK.c)
-    fσK = F.vectors[:, 257] 
+    fσK = F.vectors[:, end] 
     fσK /= fσK[1]
     fσKs = symmetrize_density(fσK)
     bfσKs = BallVector(fσKs)
