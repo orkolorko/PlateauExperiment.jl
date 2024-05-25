@@ -1,5 +1,5 @@
 using RigorousInvariantMeasures, LinearAlgebra, BallArithmetic
-export Experiment
+export Experiment, MultipleExperiments
 
 function power_norms(A, N)
     norms = zeros(N)
@@ -16,14 +16,19 @@ end
 
 bound_ρ_σ_2(σ) = sqrt(1 / (sqrt(σ^2 * 2 * π)))
 
-function Experiment(α, β, σ, K; max_iter = 10)
-    
+function deterministic_discretized(α, β, K)
     FFTNx = 8*K
     B = FourierAdjoint(K, FFTNx) 
-    
     D(x) = T(x; α, β)
     PK = assemble(B, D)
     bPK = convert_matrix(PK)
+    return bPK
+end
+
+function Experiment(α, β, σ, K; 
+                        max_iter = 10, 
+                        bPK = deterministic_discretized(α, β, K))
+    
     bD = NoiseBall(σ, K)
 
     PσK = bD * bPK
@@ -54,4 +59,10 @@ function Experiment(α, β, σ, K; max_iter = 10)
     valΥ = Υ(α, β)
     @info valΥ
     return real(λ)+valΥ * hull(-err_L2, err_L2)
+end
+
+function MultipleExperiments(α, β, K, σ_arr)
+    bPK = deterministic_discretized(α, β, K)
+    lyap = [Experiment(α, β, interval(σ), K; bPK = bPK) for σ in σ_arr]
+    return lyap
 end
