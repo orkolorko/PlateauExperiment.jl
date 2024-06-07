@@ -41,8 +41,7 @@ bound_ρ_σ_2(σ) = sqrt(1 / (sqrt(σ^2 * 2 * π)))
 # end
 
 
-function Experiment(α, β, σ, K; max_iter = 20)
-    
+function deterministic_discretized(α, β, K)
     FFTNx = 8*K
     B = FourierAdjoint(K, FFTNx) 
     D(x) = T(x; α, β)
