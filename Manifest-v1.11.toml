@@ -2,7 +2,7 @@
 
 julia_version = "1.11.1"
 manifest_format = "2.0"
-project_hash = "8db921f38e96d6be39bcf3cadf6de65d1961b943"
+project_hash = "afe2eb02fe0e2b0007467078a072e3e1bc0a3253"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "eea5d80188827b35333801ef97a40c2ed653b081"
@@ -1816,9 +1816,9 @@ version = "3.6.2"
 
 [[deps.RigorousInvariantMeasures]]
 deps = ["AbstractFFTs", "Adapt", "Arpack", "CRlibm", "CUDA", "Documenter", "DualNumbers", "FFTW", "FastRounding", "FastTransforms", "GLPK", "Glob", "IntervalArithmetic", "IntervalOptimisation", "LaTeXStrings", "LinearAlgebra", "Plots", "Polyhedra", "ProgressMeter", "Random", "RecipesBase", "Revise", "SparseArrays", "StaticArrays", "StatsPlots", "SymbolicUtils", "Symbolics", "TaylorModels", "TaylorSeries"]
-path = "/home/isaia/Code/RigorousInvariantMeasures.jl/"
+git-tree-sha1 = "93e08803b5d98caf0df4d0ae5f21b6be9c35b0fb"
 uuid = "6103b61f-200f-420b-b397-2cbeef157920"
-version = "0.2.2"
+version = "0.2.3"
 
 [[deps.Rmath]]
 deps = ["Random", "Rmath_jll"]
@@ -1902,9 +1902,9 @@ version = "1.2.1"
 
 [[deps.SentinelArrays]]
 deps = ["Dates", "Random"]
-git-tree-sha1 = "305becf8af67eae1dbc912ee9097f00aeeabb8d5"
+git-tree-sha1 = "d0553ce4031a081cc42387a9b9c8441b7d99f32d"
 uuid = "91c51154-3ec4-41a3-a24f-3f23e20d615c"
-version = "1.4.6"
+version = "1.4.7"
 
 [[deps.Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
