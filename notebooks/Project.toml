@@ -1,7 +1,0 @@
-[deps]
-BallArithmetic = "77e4f72b-b5a4-4fb0-ac2a-dcc32095a072"
-FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
-IntervalArithmetic = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
-Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
-RigorousInvariantMeasures = "6103b61f-200f-420b-b397-2cbeef157920"
-TaylorModels = "314ce334-5f6e-57ae-acf6-00b6e903104a"
