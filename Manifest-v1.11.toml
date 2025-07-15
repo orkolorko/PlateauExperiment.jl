@@ -1,8 +1,8 @@
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.11.1"
+julia_version = "1.11.6"
 manifest_format = "2.0"
-project_hash = "afe2eb02fe0e2b0007467078a072e3e1bc0a3253"
+project_hash = "f934e185df3b3ec1f7a3353521da28559b1d719e"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "eea5d80188827b35333801ef97a40c2ed653b081"
@@ -155,13 +155,16 @@ uuid = "ab4f0b2a-ad5b-11e8-123f-65d77653426b"
 version = "0.5.0"
 
 [[deps.BallArithmetic]]
-deps = ["AbstractFFTs", "FFTW", "LinearAlgebra", "MacroTools", "OpenBLASConsistentFPCSR_jll", "RoundingEmulator", "SetRounding"]
-git-tree-sha1 = "f8a798d6511e7a7b3fd1dbccb85baf13ecacb6f9"
+deps = ["LinearAlgebra", "MacroTools", "OpenBLASConsistentFPCSR_jll", "RoundingEmulator", "SetRounding"]
+git-tree-sha1 = "dc111b32c581207746bc17d501a15078d15eb4d2"
+repo-rev = "main"
+repo-url = "https://github.com/JuliaBallArithmetic/BallArithmetic.jl"
 uuid = "77e4f72b-b5a4-4fb0-ac2a-dcc32095a072"
-version = "0.1.0"
-weakdeps = ["IntervalArithmetic"]
+version = "0.1.1"
+weakdeps = ["FFTW", "IntervalArithmetic"]
 
     [deps.BallArithmetic.extensions]
+    FFTExt = "FFTW"
     IntervalArithmeticExt = "IntervalArithmetic"
 
 [[deps.BandedMatrices]]
@@ -1456,7 +1459,7 @@ version = "0.3.27+1"
 [[deps.OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "05823500-19ac-5b8b-9628-191a04bc5112"
-version = "0.8.1+2"
+version = "0.8.5+0"
 
 [[deps.OpenSSL]]
 deps = ["BitFlags", "Dates", "MozillaCACerts_jll", "OpenSSL_jll", "Sockets"]

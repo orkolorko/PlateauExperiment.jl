@@ -64,7 +64,7 @@ function Experiment(α, β, σ, K;
     bfσKs = BallVector(fσKs)
     residual = PσK * bfσKs - bfσKs
     ϵ = norm(residual.c, 2) + norm(residual.r, 2)
-    @info "ϵ" ϵ
+    @debug "ϵ" ϵ
     lnn = FourierLogDer(α, β, K)
 
     λ = dot(lnn, fσKs)
@@ -73,23 +73,23 @@ function Experiment(α, β, σ, K;
     norms = interval.(BigFloat.(power_norms(A, max_iter)))
     
     
-    @info "Norms" 
-    @info norms[1]
-    @info norms[end]
+    @debug "Norms" 
+    @debug norms[1]
+    @debug norms[end]
 
     valΓ = Γ(σ, K)
-    @info "Γ" valΓ
+    @debug "Γ" valΓ
     valρ = bound_ρ_σ_2(σ)
-    @info "ρ" valρ
+    @debug "ρ" valρ
 
     coeff_err = ((1+valΓ+valρ)*valΓ+ϵ)
     err_L2 = (sum(norms)*coeff_err)/(1-norms[end])
-    @info "err_L2" err_L2
+    @debug "err_L2" err_L2
     valΥ = Υ(α, β)
-    @info "Υ" valΥ
-    @info "diam λ" diam(real(λ))
+    @debug "Υ" valΥ
+    @debug "diam λ" diam(real(λ))
 
-    return real(λ)+valΥ * hull(-err_L2, err_L2)
+    return real(λ)+valΥ * err_L2 * interval(-1,1)
 end
 
 function MultipleExperiments(α, β, K, σ_arr)
