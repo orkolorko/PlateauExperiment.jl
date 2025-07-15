@@ -70,7 +70,7 @@ function Experiment(α, β, σ, K;
     λ = dot(lnn, fσKs)
 
     A = PσK[2:end, 2:end]
-    norms = power_norms(A, max_iter)
+    norms = interval.(BigFloat.(power_norms(A, max_iter)))
     
     
     @info "Norms" 
