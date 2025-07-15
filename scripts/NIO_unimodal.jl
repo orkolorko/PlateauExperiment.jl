@@ -36,7 +36,7 @@ foreach(
 
 param_list = [(α, 1.0, σ) for α in 3:0.1:4, σ in 0.1:0.1:1]
 
-df = adaptive_dispatch(param_list, 64, job_channel, result_channel)
+df = adaptive_dispatch_parallel(param_list, 64, job_channel, result_channel)
 
 # Add derived columns
 df.lambda_lo = inf.(df.lambda)

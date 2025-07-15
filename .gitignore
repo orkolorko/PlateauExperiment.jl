@@ -4,4 +4,6 @@
 *.jld
 /docs/Manifest.toml
 /docs/build/
+*.csv
+*.jld2
 
