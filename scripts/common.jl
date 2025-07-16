@@ -8,7 +8,7 @@ end
         job = take!(jobs)
         α, β, σ, K = job  # destructure the 4-tuple
         bPK = JLD2.load(matrix_filename(α, β, K))["P"]
-        t = @elapsed λ = Experiment(α, β, σ, K; bPK = bPK)
+        t = @elapsed λ = Experiment(α, β, σ, K; bPK = bPK, max_iter = 20)
         put!(results,
             (
                 alpha = α,

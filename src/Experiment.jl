@@ -4,7 +4,7 @@ export Experiment, MultipleExperiments
 function power_norms(A, N)
     norms = zeros(N)
     
-    K = Inf
+    K = N
 
     Aiter = A
     for i in 1:N
@@ -70,8 +70,8 @@ function Experiment(α, β, σ, K;
     λ = dot(lnn, fσKs)
 
     A = PσK[2:end, 2:end]
-    norms = interval.(BigFloat.(power_norms(A, max_iter)))
-    
+    norms = interval.(power_norms(A, max_iter))
+
     
     @debug "Norms" 
     @debug norms[1]

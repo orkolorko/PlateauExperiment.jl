@@ -34,11 +34,13 @@ foreach(
     workers()
 )
 
-sigma_0 = 1/128+1/512+1/8192
+sigma_0 = 1/16
 
-param_list = [(3.0, β, σ) for β in range(start = 51/64, length = 1024, step = 1/8192), σ in range(start = sigma_0, length = 1024, step = (1-sigma_0)/1024)]
+N = 16
 
-df = adaptive_dispatch_parallel(param_list, 64, job_channel, result_channel)
+param_list = [(3.0, β, σ) for β in range(start = 51/64, length = N, step = 1/(8*N)), σ in range(start = sigma_0, length = N, step = (1-sigma_0)/N)]
+
+df = adaptive_dispatch_parallel(param_list, 128, job_channel, result_channel)
 
 # Add derived columns
 df.lambda_lo = inf.(df.lambda)
