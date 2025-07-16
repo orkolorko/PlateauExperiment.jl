@@ -34,7 +34,9 @@ foreach(
     workers()
 )
 
-param_list = [(α, 1.0, σ) for α in 3:0.1:4, σ in 0.1:0.1:1]
+sigma_0 = 1/128+1/512+1/8192
+
+param_list = [(α, 1.0, σ) for α in range(start = 3.0, length = 1024, step = 1/1024), σ in range(start = sigma_0, length = 1024, step = (1-sigma_0)/1024)]
 
 df = adaptive_dispatch_parallel(param_list, 64, job_channel, result_channel)
 
