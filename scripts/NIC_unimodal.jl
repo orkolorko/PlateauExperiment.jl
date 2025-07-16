@@ -36,7 +36,7 @@ foreach(
 
 sigma_0 = 1/16
 
-N = 16
+N = 512
 
 param_list = [(3.0, β, σ) for β in range(start = 51/64, length = N, step = 1/(8*N)), σ in range(start = sigma_0, length = N, step = (1-sigma_0)/N)]
 
@@ -47,10 +47,10 @@ df.lambda_lo = inf.(df.lambda)
 df.lambda_hi = sup.(df.lambda)
 
 # Save CSV (omit original lambda if you prefer)
-CSV.write("results_NIO.csv", select(df, Not(:lambda)))
+CSV.write("results_NIC.csv", select(df, Not(:lambda)))
 
 # Save full object (intervals intact)
-JLD2.@save "results_NIO.jld2" df
+JLD2.@save "results_NIC.jld2" df
 
 max_diam = maximum(diam.(df.lambda))
 elapsed_time = time() - global_t0

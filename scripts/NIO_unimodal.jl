@@ -36,7 +36,7 @@ foreach(
 
 sigma_0 = 1/16
 
-N = 1024
+N = 512
 param_list = [(α, 1.0, σ) for α in range(start = 3.0, length = N, step = 1/N), σ in range(start = sigma_0, length = N, step = (1-sigma_0)/N)]
 
 
