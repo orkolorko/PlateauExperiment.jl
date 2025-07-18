@@ -125,6 +125,7 @@ function adaptive_dispatch_parallel(param_list, K0::Int,
         else
             K′ = 2K
             if K′ > max_K
+                push!(df, res)
                 @warn "✗ Gave up on $p due to 0 ∈ λ and K > $max_K"
                 delete!(remaining, p)
             else
