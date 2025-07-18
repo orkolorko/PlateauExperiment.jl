@@ -30,9 +30,18 @@ end
 function ensure_matrix(α, β, K::Int)
     fname = matrix_filename(α, β, K)
     if !isfile(fname)
-        @info "Matrix for (α=$α, β=$β, K=$K) not found. Computing..."
-        P = PlateauExperiment.deterministic_discretized(α, β, K)
-        JLD2.@save fname P
+        old_logger = current_logger()
+        try
+            # Suppress info/warn messages inside this block
+            disable_logger = SimpleLogger(stderr, Logging.Error)
+            with_logger(disable_logger) do
+                P = PlateauExperiment.deterministic_discretized(α, β, K)
+                JLD2.@save fname P
+            end
+        finally
+            # Restore previous logger
+            global_logger(old_logger)
+        end
     end
 end
 
@@ -42,24 +51,37 @@ function convergence_ok(res)::Bool
 end
 
 function save_snapshot(basename, df, remaining, current_K, counter)
-    suffix = (div(counter, 50) % 2 == 1) ? "a" : "b"
+    suffix = (div(counter, 100) % 2 == 1) ? "a" : "b"
     fname = "$(basename)_snapshot_$(suffix).jld2"
-    @info "Saving snapshot to $fname (counter = $counter, remaining = $(length(remaining)))"
+    @debug "Saving snapshot to $fname (counter = $counter, remaining = $(length(remaining)))"
     JLD2.@save fname df remaining current_K counter
 end
 
 function resume_snapshot(basename, param_list, K0)
     if isfile("$(basename)_snapshot_b.jld2")
-        JLD2.@load "$(basename)_snapshot_b.jld2" df remaining current_K counter
-    elseif isfile("$(basename)_snapshot_a.jld2")
-        JLD2.@load "$(basename)_snapshot_a.jld2" df remaining current_K counter
-    else
-        df = DataFrame(alpha=Float64[], beta=Float64[], sigma=Float64[],
-                       K=Int[], lambda=Interval[], time=Float64[], id=Int[])
-        remaining = Set(param_list)
-        current_K = Dict(p => K0 for p in param_list)
-        counter = 0
+        try
+            JLD2.@load "$(basename)_snapshot_b.jld2" df remaining current_K counter
+            return df, remaining, current_K, counter
+        catch e
+            @warn "Failed to load snapshot_b.jld2: $(e.message)"
+        end
     end
+
+    if isfile("$(basename)_snapshot_a.jld2")
+        try
+            JLD2.@load "$(basename)_snapshot_a.jld2" df remaining current_K counter
+            return df, remaining, current_K, counter
+        catch e
+            @warn "Failed to load snapshot_a.jld2: $(e.message)"
+        end
+    end
+
+    @warn "No valid snapshot could be loaded. Starting fresh."
+    df = DataFrame(alpha=Float64[], beta=Float64[], sigma=Float64[],
+                   K=Int[], lambda=Interval[], time=Float64[], id=Int[])
+    remaining = Set(param_list)
+    current_K = Dict(p => K0 for p in param_list)
+    counter = 0
     return df, remaining, current_K, counter
 end
 
@@ -67,7 +89,7 @@ function adaptive_dispatch_parallel(param_list, K0::Int,
                                     jobs, results; max_K=1024, basename="results")
     df, remaining, current_K, counter = resume_snapshot(basename, param_list, K0)
     
-    @info "Remaining", length(remaining)
+    @debug "Remaining", length(remaining)
 
     # Submit one job per unresolved parameter
     for (α, β, σ) in remaining
@@ -76,9 +98,9 @@ function adaptive_dispatch_parallel(param_list, K0::Int,
         @async put!(jobs, (α, β, σ, K))
     end
 
-    @info "Submitted jobs"
+    @debug "Submitted jobs"
     while !isempty(remaining)
-        @info "Waiting on result... $(length(remaining)) remaining"
+        @debug "Waiting on result... $(length(remaining)) remaining"
         res = take!(results)
         p = (res.alpha, res.beta, res.sigma)
         K = res.K
@@ -87,7 +109,7 @@ function adaptive_dispatch_parallel(param_list, K0::Int,
             if diam(res.lambda) < 1e-10
                 push!(df, res)
                 delete!(remaining, p)
-                @info "✓ Converged: $p at K=$K"
+                @debug "✓ Converged: $p at K=$K"
             else
                 K′ = 2K
                 if K′ > max_K
@@ -97,7 +119,7 @@ function adaptive_dispatch_parallel(param_list, K0::Int,
                     current_K[p] = K′
                     ensure_matrix(p[1], p[2], K′)
                     @async put!(jobs, (p[1], p[2], p[3], K′))
-                    @info "↻ λ too wide for $p. Retrying with K=$K′"
+                    @debug "↻ λ too wide for $p. Retrying with K=$K′"
                 end
             end
         else
@@ -109,13 +131,14 @@ function adaptive_dispatch_parallel(param_list, K0::Int,
                 current_K[p] = K′
                 ensure_matrix(p[1], p[2], K′)
                 @async put!(jobs, (p[1], p[2], p[3], K′))
-                @info "↻ 0 ∈ λ for $p. Retrying with K=$K′"
+                @debug "↻ 0 ∈ λ for $p. Retrying with K=$K′"
             end
         end
 
         counter += 1
-        if counter % 50 == 0
+        if counter % 100 == 0
             save_snapshot(basename, df, remaining, current_K, counter)
+            @info "Progress: counter = $counter, remaining = $(length(remaining)), avg time/job = $(round(sum(df.time) / max(1, size(df, 1)), digits=4)) sec, est. time left = $(round(sum(df.time) / max(1, size(df, 1)) * length(remaining) / nworkers(), digits=2)) sec"
         end
     end
 
