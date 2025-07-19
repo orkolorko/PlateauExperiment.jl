@@ -38,8 +38,9 @@ sigma_0 = 1/16
 
 N = 512
 
-param_list = [(3.0, β, σ) for σ in range(start=sigma_0, length=N, step=(1 - sigma_0)/N),
-                                     β in range(start = 51/64, length = N, step = 1/(8*N))]
+param_list = [(3.0, β, σ) for β in range(start = 51/64, length = N, step = 1/(8*N)), σ in range(start = sigma_0, length = N, step = (1-sigma_0)/N)]
+
+
 
 df = adaptive_dispatch_parallel(param_list, 64, job_channel, result_channel, basename = "NIC")
 
