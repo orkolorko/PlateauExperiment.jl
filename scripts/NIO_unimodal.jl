@@ -37,9 +37,8 @@ foreach(
 sigma_0 = 1/16
 
 N = 512
-param_list = [(α, 1.0, σ) for α in range(start = 3.0, length = N, step = 1/N), σ in range(start = sigma_0, length = N, step = (1-sigma_0)/N)]
-
-
+param_list = [(α, 1.0, σ) for σ in range(start=sigma_0, length=N, step=(1 - sigma_0)/N),
+                                     α in range(start=3.0, length=N, step=1/N)]
 df = adaptive_dispatch_parallel(param_list, 64, job_channel, result_channel, basename = "NIO")
 
 # Add derived columns
