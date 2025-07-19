@@ -1,6 +1,6 @@
 @everywhere function matrix_filename(α, β, K)
-    αstr = replace(string(round(α, digits=4)), "." => "p")
-    βstr = replace(string(round(β, digits=4)), "." => "p")
+    αstr = replace(string(round(α, digits = 4)), "." => "p")
+    βstr = replace(string(round(β, digits = 4)), "." => "p")
     return "unimodal_matrix_$(αstr)_$(βstr)_$(K).jld2"
 end
 
@@ -13,17 +13,18 @@ end
         bPK = get!(local_matrix_cache, key) do
             JLD2.load(matrix_filename(α, β, K))["P"]
         end
-        t = @elapsed λ = Experiment(α, β, σ, K; bPK=bPK)
-        
-        put!(results, (
-            alpha = α,
-            beta = β,
-            sigma = σ,
-            K = K,
-            lambda = λ,
-            time = t,
-            id = myid()
-        ))
+        t = @elapsed λ = Experiment(α, β, σ, K; bPK = bPK)
+
+        put!(results,
+            (
+                alpha = α,
+                beta = β,
+                sigma = σ,
+                K = K,
+                lambda = λ,
+                time = t,
+                id = myid()
+            ))
     end
 end
 
@@ -77,23 +78,23 @@ function resume_snapshot(basename, param_list, K0)
     end
 
     @warn "No valid snapshot could be loaded. Starting fresh."
-    df = DataFrame(alpha=Float64[], beta=Float64[], sigma=Float64[],
-                   K=Int[], lambda=Interval[], time=Float64[], id=Int[])
+    df = DataFrame(alpha = Float64[], beta = Float64[], sigma = Float64[],
+        K = Int[], lambda = Interval[], time = Float64[], id = Int[])
     remaining = Set(param_list)
-    current_K = Dict(p => K0 for p in param_list)
+    current_K = Dict((α, β) => K0 for (α, β, σ) in param_list)
     counter = 0
     return df, remaining, current_K, counter
 end
 
 function adaptive_dispatch_parallel(param_list, K0::Int,
-                                    jobs, results; max_K=1024, basename="results")
+        jobs, results; max_K = 1024, basename = "results")
     df, remaining, current_K, counter = resume_snapshot(basename, param_list, K0)
-    
+
     @debug "Remaining", length(remaining)
 
     # Submit one job per unresolved parameter
     for (α, β, σ) in remaining
-        K = current_K[(α, β, σ)]
+        K = current_K[(α, β)]
         ensure_matrix(α, β, K)
         @async put!(jobs, (α, β, σ, K))
     end
@@ -109,14 +110,20 @@ function adaptive_dispatch_parallel(param_list, K0::Int,
             if diam(res.lambda) < 1e-10
                 push!(df, res)
                 delete!(remaining, p)
+                if all(x -> (x[1], x[2]) != (p[1], p[2]), remaining)
+                    delete!(current_K, (p[1], p[2]))
+                end
                 @debug "✓ Converged: $p at K=$K"
             else
                 K′ = 2K
                 if K′ > max_K
                     @warn "✗ Max resolution exceeded for $p"
                     delete!(remaining, p)
+                    if all(x -> (x[1], x[2]) != (p[1], p[2]), remaining)
+                        delete!(current_K, (p[1], p[2]))
+                    end
                 else
-                    current_K[p] = K′
+                    current_K[(p[1], p[2])] = K′
                     ensure_matrix(p[1], p[2], K′)
                     @async put!(jobs, (p[1], p[2], p[3], K′))
                     @debug "↻ λ too wide for $p. Retrying with K=$K′"
@@ -128,8 +135,11 @@ function adaptive_dispatch_parallel(param_list, K0::Int,
                 push!(df, res)
                 @warn "✗ Gave up on $p due to 0 ∈ λ and K > $max_K"
                 delete!(remaining, p)
+                if all(x -> (x[1], x[2]) != (p[1], p[2]), remaining)
+                    delete!(current_K, (p[1], p[2]))
+                end
             else
-                current_K[p] = K′
+                current_K[(p[1], p[2])] = K′
                 ensure_matrix(p[1], p[2], K′)
                 @async put!(jobs, (p[1], p[2], p[3], K′))
                 @debug "↻ 0 ∈ λ for $p. Retrying with K=$K′"
@@ -140,6 +150,28 @@ function adaptive_dispatch_parallel(param_list, K0::Int,
         if counter % 100 == 0
             save_snapshot(basename, df, remaining, current_K, counter)
             @info "Progress: counter = $counter, remaining = $(length(remaining)), avg time/job = $(round(sum(df.time) / max(1, size(df, 1)), digits=4)) sec, est. time left = $(round(sum(df.time) / max(1, size(df, 1)) * length(remaining) / nworkers(), digits=2)) sec"
+        end
+        if counter % 2048 == 0
+            files = readdir(".")
+            used_keys = Set((α, β, K) for ((α, β), K) in current_K)
+            for file in files
+                if occursin("unimodal_matrix_", file) && endswith(file, ".jld2")
+                    m = match(r"unimodal_matrix_([0-9p]+)_([0-9p]+)_([0-9]+)\\.jld2", file)
+                    if m !== nothing
+                        α = parse(Float64, replace(m.captures[1], "p" => "."))
+                        β = parse(Float64, replace(m.captures[2], "p" => "."))
+                        K = parse(Int, m.captures[3])
+                        if !((α, β, K) in used_keys)
+                            try
+                                rm(file)
+                                @debug "Removed unused matrix file: $file"
+                            catch e
+                                @warn "Failed to delete $file: $(e.message)"
+                            end
+                        end
+                    end
+                end
+            end
         end
     end
 
