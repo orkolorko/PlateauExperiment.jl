@@ -10,10 +10,10 @@ end
     while true
         α, β, σ, K = take!(jobs)
         key = (α, β, K)
-        bPK = get!(local_matrix_cache, key) do
-            JLD2.load(matrix_filename(α, β, K))["P"]
-        end
-        t = @elapsed λ = Experiment(α, β, σ, K; bPK = bPK)
+#        bPK = get!(local_matrix_cache, key) do
+#            JLD2.load(matrix_filename(α, β, K))["P"]
+#        end
+        t = @elapsed λ = Experiment(α, β, σ, K)
 
         put!(results,
             (
@@ -95,7 +95,7 @@ function adaptive_dispatch_parallel(param_list, K0::Int,
     # Submit one job per unresolved parameter
     for (α, β, σ) in remaining
         K = current_K[(α, β)]
-        ensure_matrix(α, β, K)
+    #    ensure_matrix(α, β, K)
         @async put!(jobs, (α, β, σ, K))
     end
 
@@ -124,7 +124,7 @@ function adaptive_dispatch_parallel(param_list, K0::Int,
                     end
                 else
                     current_K[(p[1], p[2])] = K′
-                    ensure_matrix(p[1], p[2], K′)
+        #            ensure_matrix(p[1], p[2], K′)
                     @async put!(jobs, (p[1], p[2], p[3], K′))
                     @debug "↻ λ too wide for $p. Retrying with K=$K′"
                 end
@@ -140,7 +140,7 @@ function adaptive_dispatch_parallel(param_list, K0::Int,
                 end
             else
                 current_K[(p[1], p[2])] = K′
-                ensure_matrix(p[1], p[2], K′)
+        #        ensure_matrix(p[1], p[2], K′)
                 @async put!(jobs, (p[1], p[2], p[3], K′))
                 @debug "↻ 0 ∈ λ for $p. Retrying with K=$K′"
             end
