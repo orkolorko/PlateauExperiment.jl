@@ -5,16 +5,21 @@
     return "unimodal_matrix_$(αstr)_$(βstr)_$(K).jld2"
 end
 
-@everywhere const local_matrix_cache = Dict{Tuple{Float64, Float64, Int}, Tuple{Float64, Any}}()
+@everywhere const local_matrix_cache = Dict{
+    Tuple{Float64, Float64, Int}, Tuple{Float64, Any}}()
 
 @everywhere function cleanup_matrix_cache!(max_age_seconds::Float64 = 600.0)
     now = time()
-    keys_to_delete = [k for (k, (ts, _)) in local_matrix_cache if now - ts > max_age_seconds]
+    keys_to_delete = [k
+                      for (k, (ts, _)) in local_matrix_cache if now - ts > max_age_seconds]
     for k in keys_to_delete
         delete!(local_matrix_cache, k)
     end
     @debug "🧹 Cache cleanup: removed $(length(keys_to_delete)) matrices"
 end
+
+@everywhere using Logging
+
 
 @everywhere function dowork(jobs, results)
     iteration = 0
@@ -24,32 +29,26 @@ end
         α, β, σ, K = take!(jobs)
         key = (α, β, K)
 
-        t = @elapsed begin
-            λ = nothing
-            norms = nothing
-            old_logger = current_logger()
-            try
+        λ = nothing
+        norms = nothing
+        t = @elapsed begin    
+            with_logger(SimpleLogger(devnull, Logging.Error)) do
                 # Suppress all worker output
-                disable_logger = SimpleLogger(devnull, Logging.Error)
-                with_logger(disable_logger) do
-                    # Load or compute and update timestamp
-                    bPK = let
-                        entry = get!(local_matrix_cache, key) do
-                            (time(), PlateauExperiment.deterministic_discretized(α, β, K))
-                        end
-                        # Update access time
-                        local_matrix_cache[key] = (time(), entry[2])
-                        entry[2]
+                # Load or compute and update timestamp
+                bPK = let
+                    entry = get!(local_matrix_cache, key) do
+                        (time(), PlateauExperiment.deterministic_discretized(α, β, K))
                     end
-
-                    λ, norms = Experiment(α, β, σ, K; bPK=bPK)
+                    # Update access time
+                    local_matrix_cache[key] = (time(), entry[2])
+                    entry[2]
                 end
-            finally
-                global_logger(old_logger)
+                λ, norms = Experiment(α, β, σ, K; bPK = bPK)
             end
         end
 
-        put!(results, (
+        put!(results,
+            (
                 alpha = α,
                 beta = β,
                 sigma = σ,
@@ -187,7 +186,7 @@ function adaptive_dispatch_parallel(param_list, K0::Int,
     return df
 end
 
-function expand_norms(df::DataFrame; prefix="norm_")
+function expand_norms(df::DataFrame; prefix = "norm_")
     L = length(df.norms[1])  # assume all have same length
     # Build new columns for each component
     for i in 1:L
