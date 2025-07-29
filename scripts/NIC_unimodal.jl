@@ -20,9 +20,10 @@ nprocs = length(procs)
 
 @everywhere import Pkg
 @everywhere Pkg.activate(@__DIR__)
+
 #@everywhere Pkg.instantiate()
 
-@everywhere using LinearAlgebra, PlateauExperiment, JLD2, IntervalArithmetic
+@everywhere using Logging, LinearAlgebra, PlateauExperiment, JLD2, IntervalArithmetic
 
 const job_channel = RemoteChannel(() -> Channel{Tuple{Float64, Float64, Float64, Int64}}(1024))
 const result_channel = RemoteChannel(() -> Channel{NamedTuple}(1024))

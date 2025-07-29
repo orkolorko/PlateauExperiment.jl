@@ -20,6 +20,7 @@ nprocs = length(procs)
 
 @everywhere import Pkg
 @everywhere Pkg.activate(@__DIR__)
+
 #@everywhere Pkg.instantiate()
 
 @everywhere using Logging, LinearAlgebra, PlateauExperiment, JLD2, IntervalArithmetic
