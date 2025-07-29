@@ -22,7 +22,7 @@ nprocs = length(procs)
 @everywhere Pkg.activate(@__DIR__)
 #@everywhere Pkg.instantiate()
 
-@everywhere using LinearAlgebra, PlateauExperiment, JLD2, IntervalArithmetic
+@everywhere using Logging, LinearAlgebra, PlateauExperiment, JLD2, IntervalArithmetic
 
 const job_channel = RemoteChannel(() -> Channel{Tuple{Float64, Float64, Float64, Int64}}(1024))
 const result_channel = RemoteChannel(() -> Channel{NamedTuple}(1024))
@@ -36,7 +36,7 @@ foreach(
 
 sigma_0 = 1/16
 
-N = 512
+N = 1024
 param_list = [(α, 1.0, σ) for σ in range(start = sigma_0, length = N, step = (1-sigma_0)/N), α in range(start = 3.0, length = N, step = 1/N)]
 
 
