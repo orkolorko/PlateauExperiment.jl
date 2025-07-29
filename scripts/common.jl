@@ -41,7 +41,7 @@ end
                         entry[2]
                     end
 
-                    λ = Experiment(α, β, σ, K; bPK=bPK)
+                    λ, norms = Experiment(α, β, σ, K; bPK=bPK)
                 end
             finally
                 global_logger(old_logger)
@@ -54,6 +54,7 @@ end
                 sigma = σ,
                 K = K,
                 lambda = λ,
+                norms = norms,
                 time = t,
                 id = myid()
             ))
@@ -112,7 +113,7 @@ function resume_snapshot(basename, param_list, K0)
     # Fallback if no snapshot could be loaded
     @warn "⚠️ No valid snapshot could be loaded. Starting fresh."
     df = DataFrame(alpha = Float64[], beta = Float64[], sigma = Float64[],
-        K = Int[], lambda = Interval[], time = Float64[], id = Int[])
+        K = Int[], lambda = Interval[], norms = Vector{Float64}[], time = Float64[], id = Int[])
     return df, remaining, fallback_current_K, counter
 end
 
@@ -182,5 +183,16 @@ function adaptive_dispatch_parallel(param_list, K0::Int,
     end
 
     save_snapshot(basename, df, remaining, current_K, counter)
+    return df
+end
+
+function expand_norms(df::DataFrame; prefix="norm_")
+    L = length(df.norms[1])  # assume all have same length
+    # Build new columns for each component
+    for i in 1:L
+        df[!, Symbol(prefix * string(i))] = getindex.(df.norms, i)
+    end
+    # Remove the original norms column
+    select!(df, Not(:norms))
     return df
 end

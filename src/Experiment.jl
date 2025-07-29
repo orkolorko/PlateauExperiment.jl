@@ -10,13 +10,13 @@ function power_norms(A, N)
     for i in 1:N
         norms[i] = BallArithmetic.svd_bound_L2_opnorm(Aiter)
         Aiter *= A
-        if norms[i]<1
-            K = i
-            break
-        end
+        # if norms[i]<1
+        #     K = i
+        #     break
+        # end
     end
 
-    return norms[1:K]
+    return norms
 end
 
 Γ(σ, K) = ((1 / (sqrt(σ^2 * 2 * π)))exp((-σ^2 * K^2 * π^2) / 2))
@@ -89,7 +89,7 @@ function Experiment(α, β, σ, K;
     @debug "Υ" valΥ
     @debug "diam λ" diam(real(λ))
 
-    return real(λ)+valΥ * err_L2 * interval(-1,1)
+    return real(λ)+valΥ * err_L2 * interval(-1,1), norms
 end
 
 function MultipleExperiments(α, β, K, σ_arr)

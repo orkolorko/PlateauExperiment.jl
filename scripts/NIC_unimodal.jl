@@ -48,11 +48,13 @@ df = adaptive_dispatch_parallel(param_list, 64, job_channel, result_channel, bas
 df.lambda_lo = inf.(df.lambda)
 df.lambda_hi = sup.(df.lambda)
 
-# Save CSV (omit original lambda if you prefer)
-CSV.write("results_NIC.csv", select(df, Not(:lambda)))
-
 # Save full object (intervals intact)
 JLD2.@save "results_NIC.jld2" df
+
+# Save CSV (omit original lambda if you prefer)
+expanded_df = expand_norms(df)
+CSV.write("results_NIC.csv", select(expanded_df, Not(:lambda)))
+
 
 max_diam = maximum(diam.(df.lambda))
 elapsed_time = time() - global_t0
