@@ -36,7 +36,7 @@ foreach(
 
 sigma_0 = 1/16
 
-N = 1024
+N = length(Base.ARGS) >= 1 ? parse(Int, Base.ARGS[1]) : 1024
 
 param_list = [(3.0, β, σ) for σ in range(start = sigma_0, length = N, step = (1-sigma_0)/N), β in range(start = 51/64, length = N, step = 1/(8*N))]
 

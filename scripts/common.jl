@@ -26,6 +26,7 @@ end
 
         t = @elapsed begin
             λ = nothing
+            norms = nothing
             old_logger = current_logger()
             try
                 # Suppress all worker output
@@ -54,7 +55,7 @@ end
                 sigma = σ,
                 K = K,
                 lambda = λ,
-                norms = norms,
+                norms = sup.(norms),
                 time = t,
                 id = myid()
             ))
