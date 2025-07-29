@@ -5,8 +5,10 @@ version = "0.0.1-DEV"
 
 [deps]
 BallArithmetic = "77e4f72b-b5a4-4fb0-ac2a-dcc32095a072"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
 IntervalArithmetic = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
+JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
@@ -15,8 +17,10 @@ TaylorModels = "314ce334-5f6e-57ae-acf6-00b6e903104a"
 
 [compat]
 BallArithmetic = "0.1.1"
+DataFrames = "1.7.0"
 FFTW = "1.8.0"
 IntervalArithmetic = "0.20.9"
+JLD2 = "0.4.54"
 LaTeXStrings = "1.4.0"
 RigorousInvariantMeasures = "0.2.3"
 julia = "1"
