@@ -121,6 +121,7 @@ function adaptive_dispatch_parallel(param_list, K0::Int,
         jobs, results; max_K = 512, basename = "results")
     df, remaining, current_K, counter = resume_snapshot(basename, param_list, K0)
 
+    t_old = time()
     @debug "Remaining", length(remaining)
 
     # Submit one job per unresolved parameter
@@ -177,8 +178,14 @@ function adaptive_dispatch_parallel(param_list, K0::Int,
         snap_freq = length(remaining) < 100 ? 10 : 100
 
         if counter % snap_freq == 0
+            t_new = time()
             save_snapshot(basename, df, remaining, current_K, counter)
             @info "Progress: counter = $counter, remaining = $(length(remaining)), avg time/job = $(round(sum(df.time) / max(1, size(df, 1)), digits=4)) sec, est. time left = $(round(sum(df.time) / max(1, size(df, 1)) * length(remaining) / nworkers(), digits=2)) sec"
+            elapsed = round(t_new - t_old; digits = 2)
+            rate = round(snap_freq / (t_new - t_old); digits = 4)
+            eta = round(((t_new - t_old) * length(remaining)) / snap_freq; digits = 2)
+            @info "⏱️ Elapsed: $elapsed s | 🛠️ Jobs/sec: $rate | 🕒 Est. time left: $eta s"
+            t_old = t_new
         end
     end
 
