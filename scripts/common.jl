@@ -74,7 +74,7 @@ end
 function convergence_ok(res)::Bool
     λ = res.lambda
 
-    if λ == missing 
+    if λ === missing 
         return false
     end
     
