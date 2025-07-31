@@ -73,6 +73,11 @@ end
 
 function convergence_ok(res)::Bool
     λ = res.lambda
+
+    if λ == missing 
+        return false
+    end
+    
     return !(0 ∈ λ) || diam(λ) < 1e-13
 end
 
