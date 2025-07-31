@@ -31,19 +31,24 @@ end
 
         λ = nothing
         norms = nothing
+        max_iter = 10
         t = @elapsed begin    
-            with_logger(SimpleLogger(devnull, Logging.Error)) do
-                # Suppress all worker output
-                # Load or compute and update timestamp
-                bPK = let
-                    entry = get!(local_matrix_cache, key) do
-                        (time(), PlateauExperiment.deterministic_discretized(α, β, K))
+            try
+                with_logger(SimpleLogger(devnull, Logging.Error)) do
+                    bPK = let
+                        entry = get!(local_matrix_cache, key) do
+                            (time(), PlateauExperiment.deterministic_discretized(α, β, K))
+                        end
+                        local_matrix_cache[key] = (time(), entry[2])
+                        entry[2]
                     end
-                    # Update access time
-                    local_matrix_cache[key] = (time(), entry[2])
-                    entry[2]
+                    λ, norms = Experiment(α, β, σ, K; bPK = bPK, max_iter = max_iter)
+                    norms = sup.(norms)
                 end
-                λ, norms = Experiment(α, β, σ, K; bPK = bPK)
+            catch e
+                @warn "⚠️ Error during Experiment($α, $β, $σ, $K): $e"
+                λ = missing
+                norms = fill(NaN, max_iter)  # Or fill(0.0, 10) or something matching the shape
             end
         end
 
@@ -54,7 +59,7 @@ end
                 sigma = σ,
                 K = K,
                 lambda = λ,
-                norms = sup.(norms),
+                norms = norms,
                 time = t,
                 id = myid()
             ))
