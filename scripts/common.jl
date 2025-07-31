@@ -182,10 +182,14 @@ function adaptive_dispatch_parallel(param_list, K0::Int,
             save_snapshot(basename, df, remaining, current_K, counter)
             @info "Progress: counter = $counter, remaining = $(length(remaining)), avg time/job = $(round(sum(df.time) / max(1, size(df, 1)), digits=4)) sec, est. time left = $(round(sum(df.time) / max(1, size(df, 1)) * length(remaining) / nworkers(), digits=2)) sec"
             elapsed = round(t_new - t_old; digits = 2)
-            rate = round(snap_freq / (t_new - t_old); digits = 4)
-            eta = round(((t_new - t_old) * length(remaining)) / snap_freq; digits = 2)
+            dt = max(t_new - t_old, 1e-6)  # avoid division by zero
+            rate = round(snap_freq / dt; digits = 4)
+            eta  = round(dt * length(remaining) / snap_freq; digits = 2)
             @info "⏱️ Elapsed: $elapsed s | 🛠️ Jobs/sec: $rate | 🕒 Est. time left: $eta s"
             t_old = t_new
+            if counter % (10 * snap_freq) == 0
+                flush(stdout)
+            end
         end
     end
 
