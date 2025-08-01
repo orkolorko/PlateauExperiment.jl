@@ -1,6 +1,24 @@
 using RigorousInvariantMeasures, LinearAlgebra, BallArithmetic
 export Experiment, MultipleExperiments
 
+
+function safe_svd_bound(A)
+    # Step 1: Try fast upper bound
+    ub = BallArithmetic.upper_bound_L2_opnorm(A)
+    if ub < 1e-2
+        @debug "✅ SVD skipped: upper bound is small (ub = $ub)"
+        return ub  
+    end
+
+    # Step 2: Attempt full SVD, fallback if needed
+    try
+        return BallArithmetic.svd_bound_L2_opnorm(A)  # or your svd_bound_L2_opnorm(A)
+    catch e
+        @warn "⚠️ SVD failed, falling back to upper_bound_L2_opnorm: $e"
+        return ub
+    end
+end
+
 function power_norms(A, N)
     norms = zeros(N)
     
@@ -8,7 +26,8 @@ function power_norms(A, N)
 
     Aiter = A
     for i in 1:N
-        norms[i] = BallArithmetic.svd_bound_L2_opnorm(Aiter)
+
+        norms[i] = safe_svd_bound(Aiter)
         Aiter *= A
         # if norms[i]<1
         #     K = i

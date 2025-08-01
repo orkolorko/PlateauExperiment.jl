@@ -33,7 +33,7 @@ end
         norms = nothing
         max_iter = 10
         t = @elapsed begin    
-            try
+            #try
                 with_logger(SimpleLogger(devnull, Logging.Error)) do
                     bPK = let
                         entry = get!(local_matrix_cache, key) do
@@ -45,11 +45,11 @@ end
                     λ, norms = Experiment(α, β, σ, K; bPK = bPK, max_iter = max_iter)
                     norms = sup.(norms)
                 end
-            catch e
-                @warn "⚠️ Error during Experiment($α, $β, $σ, $K): $e"
-                λ = missing
-                norms = fill(NaN, max_iter)  # Or fill(0.0, 10) or something matching the shape
-            end
+            #catch e
+                #@warn "⚠️ Error during Experiment($α, $β, $σ, $K), $e"
+                #λ = missing
+                #norms = fill(NaN, max_iter)  # Or fill(0.0, 10) or something matching the shape
+            #end
         end
 
         put!(results,
@@ -128,7 +128,7 @@ function resume_snapshot(basename, param_list, K0)
 end
 
 function adaptive_dispatch_parallel(param_list, K0::Int,
-        jobs, results; max_K = 512, basename = "results")
+        jobs, results; max_K = 1024, basename = "results")
     df, remaining, current_K, counter = resume_snapshot(basename, param_list, K0)
 
     t_old = time()
