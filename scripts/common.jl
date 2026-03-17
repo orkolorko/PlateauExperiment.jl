@@ -128,7 +128,7 @@ function resume_snapshot(basename, param_list, K0)
 end
 
 function adaptive_dispatch_parallel(param_list, K0::Int,
-        jobs, results; max_K = 1024, basename = "results")
+        jobs, results; max_K = 2048, basename = "results")
     df, remaining, current_K, counter = resume_snapshot(basename, param_list, K0)
 
     t_old = time()

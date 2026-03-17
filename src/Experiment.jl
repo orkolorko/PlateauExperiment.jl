@@ -38,9 +38,14 @@ function power_norms(A, N)
     return norms
 end
 
-Γ(σ, K) = ((1 / (sqrt(σ^2 * 2 * π)))exp((-σ^2 * K^2 * π^2) / 2))
+# L¹→L² tail bound Γ_{σ,K} (Theorem 6.3 / Theorem on tail estimate)
+Γ(σ, K) = sqrt(coth(1 / (2 * σ^2)) / (σ * sqrt(π))) * exp((-σ^2 * K^2 * π^2) / 2)
 
-bound_ρ_σ_2(σ) = sqrt(1 / (sqrt(σ^2 * 2 * π)))
+# L¹→L¹ tail bound Γ^(1)_{σ,K} (Lemma 8.7, explicit integral bound)
+Γ1(σ, K) = (2 / (σ^2 * π^2 * K)) * exp((-σ^2 * K^2 * π^2) / 2)
+
+# ‖ρ_σ‖_{L²(ℝ)} · √coth(1/2σ²)  (enters second term of δ in Theorem 6.5)
+bound_ρ_coth(σ) = sqrt(1 / (2 * σ * sqrt(π))) * sqrt(coth(1 / (2 * σ^2)))
 
 
 # function process_norms(norms)
@@ -61,7 +66,7 @@ bound_ρ_σ_2(σ) = sqrt(1 / (sqrt(σ^2 * 2 * π)))
 
 
 function deterministic_discretized(α, β, K)
-    FFTNx = 8*K
+    FFTNx = 1024*K
     B = FourierAdjoint(K, FFTNx) 
     D(x) = T(x; α, β)
     PK = assemble(B, D)
@@ -96,12 +101,16 @@ function Experiment(α, β, σ, K;
     @debug norms[1]
     @debug norms[end]
 
-    valΓ = Γ(σ, K)
-    @debug "Γ" valΓ
-    valρ = bound_ρ_σ_2(σ)
-    @debug "ρ" valρ
+    valΓ  = Γ(σ, K)
+    valΓ1 = Γ1(σ, K)
+    valρc = bound_ρ_coth(σ)
+    @debug "Γ"  valΓ
+    @debug "Γ1" valΓ1
+    @debug "ρ·√coth" valρc
 
-    coeff_err = ((1+valΓ+valρ)*valΓ+ϵ)
+    # δ from Theorem 6.5: Γ(1+Γ¹) + ‖ρ‖·√coth·Γ¹, with ‖f_σ‖_L¹ = 1
+    δ = valΓ * (1 + valΓ1) + valρc * valΓ1
+    coeff_err = (δ + ϵ)
     err_L2 = (sum(norms)*coeff_err)/(1-norms[end])
     @debug "err_L2" err_L2
     valΥ = Υ(α, β)

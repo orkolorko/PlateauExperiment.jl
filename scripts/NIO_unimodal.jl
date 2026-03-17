@@ -35,12 +35,13 @@ foreach(
     workers()
 )
 
-sigma_0 = 1/16
+sigma_0 = 1/128
+sigma_stop = 1/16
 
 N = length(Base.ARGS) >= 1 ? parse(Int, Base.ARGS[1]) : 1024
 @info "🚀 Running experiment with N = $N (i.e. $(N^2) parameter points)"
 
-param_list = [(α, 1.0, σ) for σ in range(start = sigma_0, length = N, step = (1-sigma_0)/N), α in range(start = 3.0, length = N, step = 1/N)]
+param_list = [(α, 1.0, σ) for σ in range(start = sigma_0, length = N, step = (sigma_stop-sigma_0)/N), α in range(start = 3.0, length = N, step = 1/N)]
 
 
 df = adaptive_dispatch_parallel(param_list, 64, job_channel, result_channel, basename = "NIO")
