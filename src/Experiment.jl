@@ -65,11 +65,24 @@ bound_ρ_coth(σ) = sqrt(1 / (2 * σ * sqrt(π))) * sqrt(coth(1 / (2 * σ^2)))
 # end
 
 
-function deterministic_discretized(α, β, K)
-    FFTNx = 1024*K
-    B = FourierAdjoint(K, FFTNx) 
+@doc raw"""
+    deterministic_discretized(α, β, K; N = 1024K) -> BallMatrix
+
+Enclosure of the Fourier--Galerkin matrix ``P_{jk} = \int_0^1 e^{2\pi i k y}e^{-2\pi i jT(y)}\,dy``,
+``|j|, |k| \le K``, in the layout ``[0:K; -K:-1]``. RigorousInvariantMeasures computes the discrete
+coefficients from ``N`` samples, with the map evaluated on interval sample points and the FFT
+rounding enclosed; the aliasing error of row ``j`` is added here, by `aliasing_bound`.
+"""
+function deterministic_discretized(α, β, K; N = 1024 * K)
+    B = FourierAdjoint(K, N)
     D(x) = T(x; α, β)
     PK = assemble(B, D)
+    for r in axes(PK, 1)
+        j = r <= K + 1 ? r - 1 : r - 1 - (2K + 1)
+        A = aliasing_bound(j, K, N, α, β)
+        e = interval(-sup(A), sup(A))
+        PK[r, :] .= PK[r, :] .+ complex(e, e)
+    end
     bPK = convert_matrix(PK)
     return bPK
 end
