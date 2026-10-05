@@ -20,7 +20,7 @@ C_j = \frac{2|j|α(1+β)}{\pi} + \frac{j^2α^2(1+β)^2}{2α - 1}.
 ```
 """
 function aliasing_constant(j::Integer, α, β)
-    inf(interval(α)) > 1 || throw(ArgumentError("need α > 1"))
+    IntervalArithmetic.inf(interval(α)) > 1 || throw(ArgumentError("need α > 1"))
     a = interval(α)
     b = interval(β)
     return 2 * abs(j) * a * (1 + b) / interval(π) + j^2 * a^2 * (1 + b)^2 / (2a - 1)

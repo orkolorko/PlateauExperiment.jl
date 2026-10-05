@@ -1,3 +1,3 @@
 ret = Experiment(interval(35)/10, interval(1.0), interval(0.1), 128)
 
-@test abs(inf(ret) - 0.196215) < (10)^(-3)
+@test abs(IntervalArithmetic.inf(ret) - 0.196215) < (10)^(-3)
