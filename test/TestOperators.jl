@@ -2,8 +2,8 @@
     D = NoiseInterval(1, 2)
 
     @test D[1, 1] == 1
-    @test exp(-π^2 / 2) ∈ D[2, 2]
-    @test exp(-π^2 / 2) ∈ D[5, 5]
+    @test in_interval(exp(-π^2 / 2), D[2, 2])
+    @test in_interval(exp(-π^2 / 2), D[5, 5])
 
     D = NoiseBall(1, 2)
     @test 1 ∈ D[1, 1]

@@ -1,5 +1,5 @@
 using RigorousInvariantMeasures, LinearAlgebra, BallArithmetic
-export Experiment, MultipleExperiments
+export Experiment, MultipleExperiments, deterministic_discretized
 
 
 function safe_svd_bound(A)

@@ -9,5 +9,5 @@
                for x in 0:0.1:1])
 
     using IntervalArithmetic
-    @test   sqrt(2)*sqrt((log(8)-3)^2+3^2) ∈ Υ(interval(4), interval(1)) 
+    @test in_interval(sqrt(2)*sqrt((log(8)-3)^2+3^2), Υ(interval(4), interval(1))) 
 end
