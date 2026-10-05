@@ -1,4 +1,5 @@
 using RigorousInvariantMeasures, LinearAlgebra, BallArithmetic
+using FFTW   # loads the FFTWExt extension of RigorousInvariantMeasures, which assembles FourierAdjoint
 export Experiment, MultipleExperiments, deterministic_discretized
 
 
